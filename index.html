@@ -57,6 +57,7 @@
     padding:3px 8px; border-radius:999px; vertical-align:middle;}
   .badge.best{background:var(--gold); color:#fff; margin-right:6px;}
   .badge.sample{background:#fdeeda; color:#a05a00; margin-left:6px;}
+  .badge.live{background:var(--green); color:#fff; margin-left:6px;}
   .pname{font-size:16px; font-weight:700; margin:0 0 2px;}
   .gets{font-size:26px; font-weight:800; color:var(--green-d); margin:6px 0 2px;}
   .pmeta{font-size:13px; color:var(--mut); margin:2px 0;}
@@ -131,7 +132,7 @@
 
   <!-- PROVIDERS -->
   <section class="tab" id="tab-providers">
-    <div class="note">Provider figures marked <b>SAMPLE</b> are typical values to get you started — tap <b>Edit</b> and enter the real numbers from the provider's app for an accurate comparison.</div>
+    <div class="note"><b>Wise</b> (marked <b>LIVE</b>) refreshes automatically from Wise's public price feed — the date shows how fresh it is. Figures marked <b>SAMPLE</b> are typical values to get you started — tap <b>Edit</b> and enter the real numbers from the provider's app for an accurate comparison. If you edit Wise by hand, your numbers win and auto-refresh stops for it.</div>
     <div id="provList"></div>
     <button class="btn primary" id="addBtn">＋ Add provider</button>
     <button class="btn ghost" id="resetBtn">Reset to defaults</button>
@@ -224,6 +225,11 @@ function fmtMoney(code, v){
   return sym+str;
 }
 function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function badgeFor(p){
+  if(p.live) return `<span class="badge live">LIVE · ${esc(p.liveDate||"")}</span>`;
+  if(p.sample) return '<span class="badge sample">SAMPLE</span>';
+  return "";
+}
 
 /* ---------- compare math ---------- */
 function quote(p, amount, rate){
@@ -259,7 +265,7 @@ function renderResults(){
     const best=i===0;
     const feeTxt=r.q.fee>0?`CA$${r.q.fee.toFixed(2)} fee`:"No fee";
     html+=`<div class="card prov${best?" best":""}">
-      <p class="pname">${best?'<span class="badge best">BEST</span>':""}${esc(r.p.name)}${r.p.sample?'<span class="badge sample">SAMPLE</span>':""}</p>
+      <p class="pname">${best?'<span class="badge best">BEST</span>':""}${esc(r.p.name)}${badgeFor(r.p)}</p>
       <div class="gets">${fmtMoney(code,r.q.gets)}</div>
       <div class="pmeta">Rate: <b>1 CAD = ${r.q.pRate.toLocaleString("en-CA",{maximumFractionDigits:2})} ${esc(code)}</b> · ${esc(feeTxt)}</div>
       <div class="pmeta">Speed: ${esc(r.p.speed||"—")}</div>
@@ -282,7 +288,7 @@ function renderProviders(){
   box.innerHTML=S.providers.map(p=>`
     <div class="card">
       <div class="row">
-        <div class="grow"><p class="pname">${esc(p.name)}${p.sample?'<span class="badge sample">SAMPLE</span>':""}</p>
+        <div class="grow"><p class="pname">${esc(p.name)}${badgeFor(p)}</p>
         <div class="pmeta">Fee: <b>${p.feeCad>0?"CA$"+Number(p.feeCad).toFixed(2):""}${p.feeCad>0&&p.feePct>0?" + ":""}${p.feePct>0?Number(p.feePct)+"%":""}${(!p.feeCad&&!p.feePct)?"None":""}</b> · Rate margin: <b>${Number(p.marginPct)}%</b></div>
         <div class="pmeta">Speed: ${esc(p.speed||"—")}</div></div>
         <div><button class="iconbtn" data-edit="${esc(p.id)}">Edit</button>
@@ -322,11 +328,31 @@ function openEditor(id){
       feePct:parseFloat(document.getElementById("f_feePct").value)||0,
       marginPct:parseFloat(document.getElementById("f_margin").value)||0,
       speed:document.getElementById("f_speed").value.trim(),
-      url:document.getElementById("f_url").value.trim(), sample:false};
+      url:document.getElementById("f_url").value.trim(), sample:false, live:false, manual:true};
     if(id){ const i=S.providers.findIndex(x=>x.id===id); S.providers[i]=np; }
     else S.providers.push(np);
     save(); close(); renderProviders(); renderResults();
   };
+}
+
+/* ---------- live Wise figures ---------- */
+/* Wise is the only provider with a publicly reachable price feed.
+   wise-live.json is refreshed from Wise's feed (see tools/refresh_wise.py);
+   every other provider stays manually edited. */
+async function applyWiseLive(){
+  try{
+    const r=await fetch("wise-live.json",{cache:"no-store"});
+    if(!r.ok) return;
+    const j=await r.json();
+    const w=S.providers.find(p=>p.id==="wise");
+    if(!w||w.manual||!j.corridors) return;
+    const c=j.corridors[S.currency];
+    if(!c){ w.live=false; renderProviders(); renderResults(); return; }
+    w.feeCad=c.feeCad; w.feePct=c.feePct; w.marginPct=c.marginPct;
+    w.sample=false; w.live=true;
+    w.liveDate=new Date(j.updated).toLocaleDateString("en-CA",{month:"short",day:"numeric"});
+    save(); renderProviders(); renderResults();
+  }catch(e){/* keep existing figures */}
 }
 
 /* ---------- share ---------- */
@@ -347,7 +373,7 @@ function init(){
   cur.innerHTML=Object.keys(CURRS).map(c=>`<option value="${c}">${c} — ${CURRS[c].n}</option>`).join("");
   cur.value=S.currency||"NGN";
   document.getElementById("amount").value=S.amount||500;
-  cur.onchange=()=>{ S.currency=cur.value; save(); renderFx(); renderResults(); };
+  cur.onchange=()=>{ S.currency=cur.value; save(); renderFx(); renderResults(); applyWiseLive(); };
   document.getElementById("amount").oninput=e=>{ S.amount=parseFloat(e.target.value)||0; save(); renderResults();
     document.querySelectorAll("#chips .chip").forEach(c=>c.classList.toggle("on", parseFloat(c.dataset.a)===S.amount)); };
   document.querySelectorAll("#chips .chip").forEach(c=>c.onclick=()=>{
@@ -359,8 +385,9 @@ function init(){
     b.classList.add("on"); document.getElementById(b.dataset.t).classList.add("active");
   });
   document.getElementById("addBtn").onclick=()=>openEditor(null);
-  document.getElementById("resetBtn").onclick=()=>{ if(confirm("Reset providers to defaults? Your edits will be lost.")){ S.providers=JSON.parse(JSON.stringify(DEFAULT_PROVIDERS)); save(); renderProviders(); renderResults(); } };
+  document.getElementById("resetBtn").onclick=()=>{ if(confirm("Reset providers to defaults? Your edits will be lost.")){ S.providers=JSON.parse(JSON.stringify(DEFAULT_PROVIDERS)); save(); renderProviders(); renderResults(); applyWiseLive(); } };
   renderProviders();
+  applyWiseLive();
   getRates();
 }
 document.addEventListener("DOMContentLoaded", init);
