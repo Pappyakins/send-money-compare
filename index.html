@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Send Money Home — Compare</title>
+<meta name="theme-color" content="#0b6e4f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+  :root{
+    --green:#0b6e4f; --green-d:#085c41; --green-l:#e7f4ee;
+    --gold:#c9a227; --ink:#1c2b26; --mut:#63736d; --line:#e3ece8;
+    --card:#ffffff; --bg:#f4f8f6; --danger:#c0392b;
+    --r:16px; --tab-h:64px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg); color:var(--ink); font-size:16px; line-height:1.45;
+    padding-bottom:calc(var(--tab-h) + env(safe-area-inset-bottom));
+  }
+  header{
+    background:linear-gradient(135deg,var(--green),var(--green-d));
+    color:#fff; padding:20px 18px 16px; position:sticky; top:0; z-index:5;
+  }
+  header h1{margin:0; font-size:22px; letter-spacing:.2px;}
+  header p{margin:4px 0 0; font-size:13px; opacity:.9;}
+  main{max-width:640px; margin:0 auto; padding:14px 14px 8px;}
+  .tab{display:none;} .tab.active{display:block; animation:fade .18s ease;}
+  @keyframes fade{from{opacity:.4}to{opacity:1}}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--r);
+    padding:14px; margin-bottom:12px; box-shadow:0 1px 3px rgba(11,110,79,.06);}
+  .row{display:flex; gap:10px; align-items:center;}
+  .grow{flex:1;}
+  label.lbl{display:block; font-size:12px; font-weight:700; color:var(--mut);
+    text-transform:uppercase; letter-spacing:.6px; margin:0 0 6px;}
+  input[type=number],input[type=text],input[type=url],select{
+    width:100%; font-size:17px; padding:12px; border:1.5px solid var(--line);
+    border-radius:12px; background:#fff; color:var(--ink); font-family:inherit;
+  }
+  input:focus,select:focus{outline:none; border-color:var(--green);}
+  .chips{display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;}
+  .chip{border:1.5px solid var(--line); background:#fff; border-radius:999px;
+    padding:8px 14px; font-size:14px; font-weight:600; color:var(--green-d); cursor:pointer;}
+  .chip.on{background:var(--green); color:#fff; border-color:var(--green);}
+  .fxline{font-size:13px; color:var(--mut); margin-top:10px;}
+  .fxline b{color:var(--green-d);}
+  .prov{position:relative; overflow:hidden;}
+  .prov.best{border:2px solid var(--gold); background:#fffdf4;}
+  .badge{display:inline-block; font-size:11px; font-weight:800; letter-spacing:.5px;
+    padding:3px 8px; border-radius:999px; vertical-align:middle;}
+  .badge.best{background:var(--gold); color:#fff; margin-right:6px;}
+  .badge.sample{background:#fdeeda; color:#a05a00; margin-left:6px;}
+  .pname{font-size:16px; font-weight:700; margin:0 0 2px;}
+  .gets{font-size:26px; font-weight:800; color:var(--green-d); margin:6px 0 2px;}
+  .pmeta{font-size:13px; color:var(--mut); margin:2px 0;}
+  .pmeta b{color:var(--ink);}
+  .openbtn{display:inline-block; margin-top:8px; background:var(--green); color:#fff;
+    text-decoration:none; font-weight:700; font-size:14px; padding:10px 18px; border-radius:12px;}
+  .openbtn:active{background:var(--green-d);}
+  .savel{margin:4px 0 12px; font-size:14px; color:var(--green-d); font-weight:600;}
+  .btn{display:block; width:100%; border:none; border-radius:12px; padding:14px;
+    font-size:16px; font-weight:700; cursor:pointer; font-family:inherit;}
+  .btn.primary{background:var(--green); color:#fff;}
+  .btn.primary:active{background:var(--green-d);}
+  .btn.ghost{background:#fff; color:var(--green-d); border:1.5px solid var(--line); margin-top:8px;}
+  .btn.danger{background:#fff; color:var(--danger); border:1.5px solid #f0c9c4; margin-top:8px;}
+  .iconbtn{border:none; background:var(--green-l); color:var(--green-d); border-radius:10px;
+    padding:8px 12px; font-size:14px; font-weight:700; cursor:pointer;}
+  .iconbtn.del{background:#fdecea; color:var(--danger);}
+  nav.tabs{position:fixed; left:0; right:0; bottom:0; height:calc(var(--tab-h) + env(safe-area-inset-bottom));
+    background:#fff; border-top:1px solid var(--line); display:flex; z-index:10;
+    padding-bottom:env(safe-area-inset-bottom);}
+  nav.tabs button{flex:1; border:none; background:none; font-size:12px; font-weight:700;
+    color:var(--mut); cursor:pointer; font-family:inherit; padding-top:6px;}
+  nav.tabs button .ti{display:block; font-size:22px; margin-bottom:2px;}
+  nav.tabs button.on{color:var(--green);}
+  footer{max-width:640px; margin:6px auto 0; padding:0 14px 10px; text-align:center;
+    font-size:12px; color:var(--mut);}
+  .note{font-size:13px; color:var(--mut); background:#fffbeF; border:1px solid #f3e3bb;
+    border-radius:12px; padding:10px 12px; margin-bottom:12px;}
+  .modal{position:fixed; inset:0; background:rgba(0,0,0,.45); display:none;
+    align-items:flex-end; justify-content:center; z-index:50;}
+  .modal.show{display:flex;}
+  .sheet{background:#fff; border-radius:20px 20px 0 0; width:100%; max-width:640px;
+    max-height:88vh; overflow:auto; padding:18px 18px calc(18px + env(safe-area-inset-bottom));}
+  .sheet h3{margin:0 0 12px; font-size:18px;}
+  .fld{margin-bottom:12px;}
+  .fld2{display:flex; gap:10px;} .fld2 .fld{flex:1;}
+  .empty{text-align:center; color:var(--mut); padding:26px 10px; font-size:14px;}
+  .about h3{margin:14px 0 6px; font-size:16px;}
+  .about p,.about li{font-size:14px; color:#33413c;}
+  .about ul{padding-left:20px; margin:6px 0;}
+</style>
+</head>
+<body>
+<header>
+  <h1>💸 Send Money Home</h1>
+  <p>Compare transfer services &amp; keep more of your money</p>
+</header>
+
+<main>
+  <!-- COMPARE -->
+  <section class="tab active" id="tab-compare">
+    <div class="card">
+      <label class="lbl" for="amount">You send (CAD)</label>
+      <input type="number" id="amount" inputmode="decimal" min="1" step="any" value="500">
+      <div class="chips" id="chips">
+        <button class="chip" data-a="100">$100</button>
+        <button class="chip" data-a="500">$500</button>
+        <button class="chip" data-a="1000">$1,000</button>
+        <button class="chip" data-a="2500">$2,500</button>
+      </div>
+    </div>
+    <div class="card">
+      <label class="lbl" for="currency">Recipient gets</label>
+      <select id="currency"></select>
+      <div class="fxline" id="fxline">Fetching live rate…</div>
+    </div>
+    <div class="savel" id="savel"></div>
+    <div id="results"></div>
+    <button class="btn primary" id="shareBtn">📤 Share comparison</button>
+    <div class="note" style="margin-top:12px">Estimates only — provider fees and rates change. Always confirm the final amount in the provider's app before sending.</div>
+  </section>
+
+  <!-- PROVIDERS -->
+  <section class="tab" id="tab-providers">
+    <div class="note">Provider figures marked <b>SAMPLE</b> are typical values to get you started — tap <b>Edit</b> and enter the real numbers from the provider's app for an accurate comparison.</div>
+    <div id="provList"></div>
+    <button class="btn primary" id="addBtn">＋ Add provider</button>
+    <button class="btn ghost" id="resetBtn">Reset to defaults</button>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="tab about" id="tab-about">
+    <div class="card">
+      <h3>How it works</h3>
+      <ul>
+        <li>Enter how much you want to send in Canadian dollars.</li>
+        <li>Pick the currency your recipient will receive.</li>
+        <li>The app fetches the live mid-market rate and applies each provider's fee + rate margin to show what actually arrives.</li>
+        <li>Providers are ranked — the top one puts the most money in your recipient's hands.</li>
+      </ul>
+      <h3>Your data</h3>
+      <p>Everything is stored on your phone only. No account, no server, nothing leaves your device except the public exchange-rate lookup.</p>
+      <h3>Disclaimer</h3>
+      <p>Comparisons are estimates based on the fee and rate-margin figures you enter. Transfer services change their pricing often — always verify the final receive amount in the provider's own app before sending money.</p>
+    </div>
+  </section>
+</main>
+
+<footer>Powered by @jakinsCraft</footer>
+
+<nav class="tabs">
+  <button data-t="tab-compare" class="on"><span class="ti">⚖️</span>Compare</button>
+  <button data-t="tab-providers"><span class="ti">🏦</span>Providers</button>
+  <button data-t="tab-about"><span class="ti">ℹ️</span>About</button>
+</nav>
+
+<div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
+
+<script>
+"use strict";
+/* ---------- data ---------- */
+const CURRS = {
+  NGN:{n:"Nigerian Naira",s:"₦"}, GHS:{n:"Ghanaian Cedi",s:"₵"},
+  KES:{n:"Kenyan Shilling",s:"KSh "}, UGX:{n:"Ugandan Shilling",s:"USh "},
+  TZS:{n:"Tanzanian Shilling",s:"TSh "}, ZAR:{n:"South African Rand",s:"R "},
+  XOF:{n:"West African CFA Franc",s:"CFA "}, XAF:{n:"Central African CFA Franc",s:"FCFA "},
+  EGP:{n:"Egyptian Pound",s:"E£ "}, INR:{n:"Indian Rupee",s:"₹"},
+  PKR:{n:"Pakistani Rupee",s:"₨ "}, PHP:{n:"Philippine Peso",s:"₱"},
+  USD:{n:"US Dollar",s:"US$"}, GBP:{n:"British Pound",s:"£"}, EUR:{n:"Euro",s:"€"}
+};
+const DEFAULT_PROVIDERS = [
+  {id:"wise",      name:"Wise",          feeCad:0,    feePct:0.8, marginPct:0.0, speed:"Minutes – hours", url:"https://wise.com",          sample:true},
+  {id:"lemfi",     name:"Lemfi",         feeCad:0,    feePct:0,   marginPct:0.8, speed:"Minutes",         url:"https://lemfi.com",         sample:true},
+  {id:"sendwave",  name:"Sendwave",      feeCad:0,    feePct:0,   marginPct:1.2, speed:"Minutes",         url:"https://sendwave.com",      sample:true},
+  {id:"remitly",   name:"Remitly",       feeCad:2.99, feePct:0,   marginPct:1.5, speed:"Minutes – hours", url:"https://www.remitly.com",   sample:true},
+  {id:"wunion",    name:"Western Union", feeCad:5.00, feePct:0,   marginPct:2.5, speed:"Minutes – days",  url:"https://www.westernunion.com", sample:true},
+  {id:"moneygram", name:"MoneyGram",     feeCad:5.00, feePct:0,   marginPct:2.5, speed:"Minutes – hours", url:"https://www.moneygram.com", sample:true}
+];
+const LS_KEY="smc_v1", FX_KEY="smc_fx";
+let midRate=null, fxWhen=null, fxLive=false;
+
+function loadState(){
+  try{ const s=JSON.parse(localStorage.getItem(LS_KEY)); if(s&&s.providers) return s; }catch(e){}
+  return {providers:JSON.parse(JSON.stringify(DEFAULT_PROVIDERS)), currency:"NGN", amount:500};
+}
+let S=loadState();
+function save(){ localStorage.setItem(LS_KEY, JSON.stringify(S)); }
+
+/* ---------- fx ---------- */
+async function getRates(){
+  const now=Date.now();
+  try{
+    const r=await fetch("https://open.er-api.com/v6/latest/CAD");
+    const j=await r.json();
+    if(j.result==="success"&&j.rates){
+      midRate=j.rates; fxWhen=now; fxLive=true;
+      localStorage.setItem(FX_KEY, JSON.stringify({t:now, rates:j.rates}));
+      renderFx(); renderResults(); return;
+    }
+    throw 0;
+  }catch(e){
+    try{
+      const c=JSON.parse(localStorage.getItem(FX_KEY));
+      if(c&&c.rates){ midRate=c.rates; fxWhen=c.t; fxLive=false; renderFx(); renderResults(); return; }
+    }catch(e2){}
+    document.getElementById("fxline").textContent="Couldn't load rates — check your connection and reopen the app.";
+  }
+}
+
+/* ---------- formatting ---------- */
+function fmtMoney(code, v){
+  const sym=(CURRS[code]||{s:""}).s;
+  const n=Number(v);
+  const str=n>=1000? Math.round(n).toLocaleString("en-CA") : n.toLocaleString("en-CA",{maximumFractionDigits:2});
+  return sym+str;
+}
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+/* ---------- compare math ---------- */
+function quote(p, amount, rate){
+  const fee=p.feeCad + amount*(p.feePct/100);
+  const afterFee=Math.max(0, amount-fee);
+  const pRate=rate*(1-p.marginPct/100);
+  const gets=afterFee*pRate;
+  return {fee, afterFee, pRate, gets};
+}
+
+/* ---------- render: compare ---------- */
+function renderFx(){
+  const el=document.getElementById("fxline");
+  const code=S.currency;
+  if(midRate&&midRate[code]){
+    const r=midRate[code];
+    const when=fxWhen?new Date(fxWhen).toLocaleString("en-CA",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}):"";
+    el.innerHTML=`Mid-market: <b>1 CAD = ${r.toLocaleString("en-CA",{maximumFractionDigits:2})} ${esc(code)}</b> ${fxLive?`· live · ${esc(when)}`:`· cached · ${esc(when)}`}`;
+  } else {
+    el.textContent="Rate unavailable for "+code;
+  }
+}
+function renderResults(){
+  const box=document.getElementById("results");
+  const code=S.currency, amount=parseFloat(document.getElementById("amount").value)||0;
+  if(!midRate||!midRate[code]){ box.innerHTML='<div class="empty">Waiting for exchange rate…</div>'; return; }
+  if(amount<=0){ box.innerHTML='<div class="empty">Enter an amount to compare.</div>'; return; }
+  const rate=midRate[code];
+  const rows=S.providers.map(p=>({p, q:quote(p,amount,rate)}))
+    .sort((a,b)=>b.q.gets-a.q.gets);
+  let html="";
+  rows.forEach((r,i)=>{
+    const best=i===0;
+    const feeTxt=r.q.fee>0?`CA$${r.q.fee.toFixed(2)} fee`:"No fee";
+    html+=`<div class="card prov${best?" best":""}">
+      <p class="pname">${best?'<span class="badge best">BEST</span>':""}${esc(r.p.name)}${r.p.sample?'<span class="badge sample">SAMPLE</span>':""}</p>
+      <div class="gets">${fmtMoney(code,r.q.gets)}</div>
+      <div class="pmeta">Rate: <b>1 CAD = ${r.q.pRate.toLocaleString("en-CA",{maximumFractionDigits:2})} ${esc(code)}</b> · ${esc(feeTxt)}</div>
+      <div class="pmeta">Speed: ${esc(r.p.speed||"—")}</div>
+      ${r.p.url?`<a class="openbtn" href="${esc(r.p.url)}" target="_blank" rel="noopener">Open ${esc(r.p.name)} ↗</a>`:""}
+    </div>`;
+  });
+  box.innerHTML=html;
+  const sv=document.getElementById("savel");
+  if(rows.length>1){
+    const diff=rows[0].q.gets-rows[rows.length-1].q.gets;
+    sv.textContent=diff>0?`Best deal saves ${fmtMoney(code,diff)} vs ${rows[rows.length-1].p.name}`:"";
+  } else sv.textContent="";
+  window._lastRows=rows;
+}
+
+/* ---------- render: providers ---------- */
+function renderProviders(){
+  const box=document.getElementById("provList");
+  if(!S.providers.length){ box.innerHTML='<div class="empty">No providers yet. Add your first one below.</div>'; return; }
+  box.innerHTML=S.providers.map(p=>`
+    <div class="card">
+      <div class="row">
+        <div class="grow"><p class="pname">${esc(p.name)}${p.sample?'<span class="badge sample">SAMPLE</span>':""}</p>
+        <div class="pmeta">Fee: <b>${p.feeCad>0?"CA$"+Number(p.feeCad).toFixed(2):""}${p.feeCad>0&&p.feePct>0?" + ":""}${p.feePct>0?Number(p.feePct)+"%":""}${(!p.feeCad&&!p.feePct)?"None":""}</b> · Rate margin: <b>${Number(p.marginPct)}%</b></div>
+        <div class="pmeta">Speed: ${esc(p.speed||"—")}</div></div>
+        <div><button class="iconbtn" data-edit="${esc(p.id)}">Edit</button>
+        <button class="iconbtn del" data-del="${esc(p.id)}">✕</button></div>
+      </div>
+    </div>`).join("");
+  box.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>openEditor(b.dataset.edit));
+  box.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
+    if(confirm("Delete this provider?")){ S.providers=S.providers.filter(x=>x.id!==b.dataset.del); save(); renderProviders(); renderResults(); }
+  });
+}
+
+/* ---------- editor modal ---------- */
+const modal=document.getElementById("modal"), sheet=document.getElementById("sheet");
+function openEditor(id){
+  const p=id?S.providers.find(x=>x.id===id):{id:"p"+Date.now(),name:"",feeCad:0,feePct:0,marginPct:0,speed:"",url:"",sample:false};
+  sheet.innerHTML=`<h3>${id?"Edit":"Add"} provider</h3>
+    <div class="fld"><label class="lbl">Name</label><input type="text" id="f_name" value="${esc(p.name)}" placeholder="e.g. Lemfi"></div>
+    <div class="fld2">
+      <div class="fld"><label class="lbl">Flat fee (CA$)</label><input type="number" id="f_feeCad" inputmode="decimal" step="any" min="0" value="${p.feeCad}"></div>
+      <div class="fld"><label class="lbl">Fee (%)</label><input type="number" id="f_feePct" inputmode="decimal" step="any" min="0" value="${p.feePct}"></div>
+    </div>
+    <div class="fld"><label class="lbl">Rate margin below mid-market (%)</label><input type="number" id="f_margin" inputmode="decimal" step="any" min="0" value="${p.marginPct}"></div>
+    <div class="fld"><label class="lbl">Speed</label><input type="text" id="f_speed" value="${esc(p.speed)}" placeholder="e.g. Minutes"></div>
+    <div class="fld"><label class="lbl">Website / app link</label><input type="url" id="f_url" value="${esc(p.url)}" placeholder="https://…"></div>
+    <button class="btn primary" id="f_save">Save provider</button>
+    <button class="btn ghost" id="f_cancel">Cancel</button>`;
+  modal.classList.add("show");
+  const close=()=>modal.classList.remove("show");
+  document.getElementById("f_cancel").onclick=close;
+  modal.onclick=e=>{ if(e.target===modal) close(); };
+  document.getElementById("f_save").onclick=()=>{
+    const name=document.getElementById("f_name").value.trim();
+    if(!name){ alert("Give the provider a name."); return; }
+    const np={id:p.id, name,
+      feeCad:parseFloat(document.getElementById("f_feeCad").value)||0,
+      feePct:parseFloat(document.getElementById("f_feePct").value)||0,
+      marginPct:parseFloat(document.getElementById("f_margin").value)||0,
+      speed:document.getElementById("f_speed").value.trim(),
+      url:document.getElementById("f_url").value.trim(), sample:false};
+    if(id){ const i=S.providers.findIndex(x=>x.id===id); S.providers[i]=np; }
+    else S.providers.push(np);
+    save(); close(); renderProviders(); renderResults();
+  };
+}
+
+/* ---------- share ---------- */
+document.getElementById("shareBtn").onclick=async ()=>{
+  const rows=window._lastRows||[];
+  if(!rows.length){ alert("Nothing to share yet — enter an amount first."); return; }
+  const code=S.currency, amount=parseFloat(document.getElementById("amount").value)||0;
+  let t=`💸 Sending CA$${amount.toLocaleString("en-CA")} → ${code}:\n`;
+  rows.forEach((r,i)=>{ t+=`${i+1}. ${r.p.name}: ${fmtMoney(code,r.q.gets)}\n`; });
+  t+=`Best: ${rows[0].p.name} ✅\n(via Send Money Home)`;
+  if(navigator.share){ try{ await navigator.share({text:t}); }catch(e){} }
+  else{ try{ await navigator.clipboard.writeText(t); alert("Comparison copied — paste it anywhere."); }catch(e){ alert(t); } }
+};
+
+/* ---------- wiring ---------- */
+function init(){
+  const cur=document.getElementById("currency");
+  cur.innerHTML=Object.keys(CURRS).map(c=>`<option value="${c}">${c} — ${CURRS[c].n}</option>`).join("");
+  cur.value=S.currency||"NGN";
+  document.getElementById("amount").value=S.amount||500;
+  cur.onchange=()=>{ S.currency=cur.value; save(); renderFx(); renderResults(); };
+  document.getElementById("amount").oninput=e=>{ S.amount=parseFloat(e.target.value)||0; save(); renderResults();
+    document.querySelectorAll("#chips .chip").forEach(c=>c.classList.toggle("on", parseFloat(c.dataset.a)===S.amount)); };
+  document.querySelectorAll("#chips .chip").forEach(c=>c.onclick=()=>{
+    document.getElementById("amount").value=c.dataset.a;
+    document.getElementById("amount").dispatchEvent(new Event("input")); });
+  document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{
+    document.querySelectorAll("nav.tabs button").forEach(x=>x.classList.remove("on"));
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    b.classList.add("on"); document.getElementById(b.dataset.t).classList.add("active");
+  });
+  document.getElementById("addBtn").onclick=()=>openEditor(null);
+  document.getElementById("resetBtn").onclick=()=>{ if(confirm("Reset providers to defaults? Your edits will be lost.")){ S.providers=JSON.parse(JSON.stringify(DEFAULT_PROVIDERS)); save(); renderProviders(); renderResults(); } };
+  renderProviders();
+  getRates();
+}
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>
