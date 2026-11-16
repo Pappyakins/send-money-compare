@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-09T11:47:56.326003+00:00",
+  "updated": "2026-11-16T11:47:58.765105+00:00",
   "source": "Wise (wise.com gateway price feed)",
   "referenceAmountCad": 500,
   "note": "feeCad = flat fee, feePct = variable %, marginPct = 0 (Wise uses the mid-market rate)",
@@ -8,49 +8,49 @@
       "feeCad": 2.08,
       "feePct": 0.67,
       "marginPct": 0,
-      "midRate": 979.696
+      "midRate": 991.95
     },
     "GHS": {
       "feeCad": 3.47,
-      "feePct": 1.16,
+      "feePct": 1.11,
       "marginPct": 0,
-      "midRate": 8.29015
+      "midRate": 8.20441
     },
     "KES": {
       "feeCad": 4.11,
       "feePct": 1.09,
       "marginPct": 0,
-      "midRate": 92.2547
+      "midRate": 91.0396
     },
     "INR": {
-      "feeCad": 2.02,
+      "feeCad": 2.03,
       "feePct": 0.58,
       "marginPct": 0,
-      "midRate": 66.6001
+      "midRate": 65.7781
     },
     "PHP": {
       "feeCad": 1.88,
       "feePct": 0.65,
       "marginPct": 0,
-      "midRate": 44.8638
+      "midRate": 44.7807
     },
     "USD": {
       "feeCad": 2.64,
       "feePct": 0.48,
       "marginPct": 0,
-      "midRate": 0.709925
+      "midRate": 0.700035
     },
     "GBP": {
       "feeCad": 1.91,
       "feePct": 0.49,
       "marginPct": 0,
-      "midRate": 0.528926
+      "midRate": 0.530832
     },
     "EUR": {
       "feeCad": 1.87,
       "feePct": 0.45,
       "marginPct": 0,
-      "midRate": 0.634201
+      "midRate": 0.63602
     }
   }
 }
